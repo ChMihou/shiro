@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form id="form">
+        注册:<p></p>
+        输入账号：<input type="text" id="name" name="name" placeholder="输入账号" verfy=/><p></p>
+        输入密码：<input type="password" id="pass" name="pass" placeholder="输入密码"/><p></p>
+        输入电话号码：<input type="text" id="phone" name = "phone"  onblur="" ><p></p>
+        输入邮箱地址：<input type="text" id="email" name = "email"  onblur=""><p></p>
+        <button type="submit" onclick="checkSubmit()" name="submit" >提交</button>
+        <input type="reset" value="重置" name="reset">
+    </form>
+
+</body>
+<script type="text/javascript">
+    function checkSubmit() {
+        $.ajax({
+            url:"login/logincheck",
+            type:"post",
+            data:$('#form').serialize(),
+            success:function (data) {
+                if (data) {
+                    confirm("注册成功");
+                    window.location.replace("return/ok")
+                }else
+                    alert("注册失败");
+            }
+            }
+        );
+    }
+</script>
+</html>

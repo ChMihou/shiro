@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+        <table border="1">
+            <tr>
+                <th>用户ID</th>
+                <th>用户名</th>
+                <th>用户密码</th>
+                <th>操作</th>
+            </tr>
+            <tr th:each="user:${users}">
+                <th th:text="${user.uid}"></th>
+                <th th:text="${user.name}"></th>
+                <th th:text="${user.pass}"></th>
+                <th><button style="color: #0000ff" type="submit" onclick="click()" name="sb" value="导出用户数据">导出用户数据</button></th>
+            </tr>
+            <th th:span="1"><button style="color: blue" type="submit" onclick="click2()" name="sb" value="导出全部用户数据">导出全部用户数据</button></th>
+                <th th:span="1"><form class="form-horizontal" id="form_table" action="/import" enctype="multipart/form-data" method="post">
+                    <br/>
+                    <br/>
+                    <button style="color: blue" type="submit" class="btn btn-primary">导入用户数据</button>
+                    <input class="form-input" type="file" name="filename" />
+                </form>
+        </table>
+</body>
+<script text="javascript">
+    function click() {
+        $.ajax({
+            url: "userlist/export",
+            type: "POST",
+            data: {},
+            success: function () {
+
+                if(data) {
+                    alert("打印成功");
+                }else{
+                    alert("打印失败")
+            }
+    }
+    });
+    }
+    function click2(){
+        $.ajax({
+            type:"POST",
+            url:"userlist/exports",
+            data:{},
+            success:function (data) {
+                if (data){
+                    alert("打印成功");
+                }else{
+                    alert("打印失败");
+                }
+            }
+        });
+    }
+    function click3(){
+        $.ajax({
+            url:"userlist/imports",
+            type:"POST",
+            data:{},
+            success:function (data) {
+                if (data){
+                    alert("导入成功");
+                }else{
+                    alert("导入失败");
+                }
+            }
+        });
+    }
+</script>
+</html>

@@ -1,0 +1,5 @@
+${AnsiColor.BRIGHT_GREEN}
+芜湖，起飞！
+${AnsiColor.BLACK}
+Application Version: ${application.version}${application.formatted-version}
+Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}

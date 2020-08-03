@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.restful.demo.dao.UserDao">
+    <resultMap id="UserMap" type="com.example.restful.demo.enity.User">
+        <id column="id" jdbcType="INTEGER" property="uid" />
+        <result column="username" jdbcType="VARCHAR" property="name"/>
+        <result column="password" jdbcType="VARCHAR" property="pass"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="role" jdbcType="INTEGER" property="role"/>
+        <result column="salt" jdbcType="VARCHAR" property="salt"/>
+    </resultMap>
+
+    <select id="selectUser" resultMap="UserMap" parameterType="Integer">
+        select * from users where uid = #{uid}
+    </select>
+
+    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="uid">
+        insert into users(username,password,phone,email,salt,role) values(#{name},#{pass},#{phone},#{email},#{salt},#{role})
+    </insert>
+
+    <update id="updateUser" parameterType="User" useGeneratedKeys="true" keyProperty="uid">
+        update users set username = #{name},password = #{pass} where uid = #{uid}
+    </update>
+
+    <delete id="deleteUser" parameterType="Integer">
+        delete from users where uid = #{uid}
+    </delete>
+    
+    <select id="selectAllUser" resultMap="UserMap">
+        select * from users;
+    </select>
+
+    <select id="selectUserName" resultMap="UserMap" parameterType="String">
+        select * from users where username = #{name};
+    </select>
+</mapper>
