@@ -5,4 +5,8 @@
     <select id="select" resultType="Permission" parameterType="Integer">
         select * from permission where id = #{id}
     </select>
+    <select id="selectUserAll" parameterType="String" resultType="String">
+        select p.menu from rolepermission rp,users u,permission p where u.username = #{username}
+        and u.role = rp.roleid and rp.permissionid = p.id;
+    </select>
 </mapper>

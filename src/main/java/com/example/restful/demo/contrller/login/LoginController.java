@@ -45,13 +45,6 @@ public class LoginController {
         return mv;
     }
 
-    @RequestMapping("admin/index")
-    public ModelAndView index(){
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("admin/index");
-        return mv;
-    }
-
     @RequestMapping(value="login")
     public String loginForm(){
         if(ShiroUtils.isLogin()){
@@ -104,7 +97,6 @@ public class LoginController {
         //验证是否登录成功
         if(subject.isAuthenticated()){
             Session session = SecurityUtils.getSubject().getSession();
-            session.setTimeout(180000);
             System.out.println(session.getTimeout());
             logger.info("用户[" + username + "]登录认证通过(这里可以进行一些认证通过后的一些系统参数初始化操作)");
             mv.setViewName("admin/index");
@@ -140,27 +132,10 @@ public class LoginController {
         System.out.println(session.getTimeout());
         return mv;
     }
-
-    @RequestMapping("login/logincheck")
-    @ResponseBody
-    @Transactional
-    public JsonResult LoginCheck(@Valid User user, BindingResult errors) {
-        System.out.println(errors.getErrorCount());
-        if (errors.getErrorCount() > 0) {
-            List<FieldError> fieldErrors = errors.getFieldErrors();
-            for (FieldError error : fieldErrors) {
-                System.out.println("验证作用:" + error.getDefaultMessage());
-            }
-            return new JsonResult(JsonResult.SUCCESS, user, JsonResult.FAIL_RETURN);
-        }
-        System.out.println(user);
-        Integer flag = userService.insertUser(user);
-        if (flag > 0) {
-            System.out.println(new JsonResult(JsonResult.SUCCESS, user, JsonResult.SUCCESS_RETURN));
-            return new JsonResult(JsonResult.SUCCESS, user, JsonResult.SUCCESS_RETURN);
-        } else {
-            System.out.println(new JsonResult(JsonResult.SUCCESS, user, errors.getFieldError().getDefaultMessage()));
-            return new JsonResult(JsonResult.ERROR, user, JsonResult.FAIL_RETURN);
-        }
+    @RequestMapping("login/logout")
+    public ModelAndView logout(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("login/logout");
+        return mv;
     }
 }

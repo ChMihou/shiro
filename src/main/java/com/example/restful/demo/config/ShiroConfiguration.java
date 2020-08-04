@@ -3,17 +3,20 @@ package com.example.restful.demo.config;
 import com.example.restful.demo.common.ShiroRealm;
 import com.example.restful.demo.security.AdminFormAuthenticationFilter;
 import com.example.restful.demo.security.CustomerLogoutFilter;
-import com.example.restful.demo.security.ShiroSessionFilter;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
+import org.apache.shiro.authc.pam.AuthenticationStrategy;
 import org.apache.shiro.realm.Realm;
+import org.apache.shiro.spring.LifecycleBeanPostProcessor;
+import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.mgt.DefaultWebSubjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
 import javax.servlet.Filter;
 import java.util.*;
@@ -31,10 +34,30 @@ public class ShiroConfiguration {
             logger.debug("ShiroConfiguration.adminShiroRealm()");
         }
         ShiroRealm adminShiroRealm = new ShiroRealm();
+        adminShiroRealm.setCredentialsMatcher(hashedCredentialsMatcher());
         return adminShiroRealm;
     }
+    /**
+     * 当配置多Relam的情景下：
+     * Shiro默认提供了三种 AuthenticationStrategy 实现：
+     * AtLeastOneSuccessfulStrategy ：其中一个通过则成功。
+     * FirstSuccessfulStrategy ：其中一个通过则成功，但只返回第一个通过的Realm提供的验证信息。
+     * AllSuccessfulStrategy ：凡是配置到应用中的Realm都必须全部通过。
+     * authenticationStrategy
+     * @return
+     */
+    @Bean(name="authenticationStrategy")
+    public AuthenticationStrategy authenticationStrategy() {
+        if(logger.isDebugEnabled()){
+            logger.debug("ShiroConfiguration.authenticationStrategy()");
+        }
+        return new AtLeastOneSuccessfulStrategy();
+    }
+
     /***
-     * shiro的在进行密码验证的时候，将会在此进行匹配
+     * 凭证匹配器
+     * （由于我们的密码校验交给Shiro的SimpleAuthenticationInfo进行处理了
+     *  所以我们需要修改下doGetAuthenticationInfo中的代码）
      * @return
      */
     @Bean("hashedCredentialsMatcher")
@@ -57,10 +80,10 @@ public class ShiroConfiguration {
             logger.debug("ShiroConfiguration.getDefaultWebSecurityManage()");
         }
         DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
-
+        //注入认证
         Map<String, Object> shiroAuthenticatorRealms = new HashMap<>(5);
         shiroAuthenticatorRealms.put("adminShiroRealm", adminShiroRealm());
-
+        //注入权限
         Collection<Realm> shiroAuthorizerRealms = new ArrayList<Realm>();
         shiroAuthorizerRealms.add(adminShiroRealm());
         securityManager.setRealms(shiroAuthorizerRealms);
@@ -68,6 +91,55 @@ public class ShiroConfiguration {
         return securityManager;
     }
 
+
+    /**
+     *  SimpleAuthenticationInfo
+     * 传统的加密验证，本demo用的是双重MD5认证
+     * @return
+     */
+    @Bean(name = "customHashedCredentialsMatcher")
+    public HashedCredentialsMatcher customHashedCredentialsMatcher(){
+        if(logger.isDebugEnabled()){
+            logger.debug("ShiroConfiguration.adminHashedCredentialsMatcher()");
+        }
+        HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
+        //散列算法:这里使用MD5算法;
+        hashedCredentialsMatcher.setHashAlgorithmName("md5");
+        //散列的次数，当于 m比如散列两次，相d5("");
+        hashedCredentialsMatcher.setHashIterations(1);
+        return hashedCredentialsMatcher;
+    }
+
+    /**
+     * shiro生命周期的管理
+     * 注入LifecycleBeanPostProcessor
+     * @return
+     */
+    @Bean(name = "lifecycleBeanPostProcessor")
+    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
+        if(logger.isDebugEnabled()){
+            logger.debug("ShiroConfiguration.lifecycleBeanPostProcessor()");
+        }
+        return new LifecycleBeanPostProcessor();
+    }
+
+    /**
+     * 指定配置：
+     * shiro跳转的指定错误页面
+     * @return
+     */
+    @Bean
+    public SimpleMappingExceptionResolver simpleMappingExceptionResolver() {
+        SimpleMappingExceptionResolver resolver = new SimpleMappingExceptionResolver();
+        Properties properties = new Properties();
+
+        /*未授权处理页*/
+        properties.setProperty("org.apache.shiro.authz.UnauthorizedException", "admin/unauthorized");
+        /*身份没有验证*/
+        properties.setProperty("org.apache.shiro.authz.UnauthenticatedException", "login/login");
+        resolver.setExceptionMappings(properties);
+        return resolver;
+    }
 
     /**
      * ShiroFilterFactoryBean 处理拦截资源文件问题。
@@ -84,16 +156,13 @@ public class ShiroConfiguration {
             logger.debug("ShiroConfiguration.shirFilter()");
         }
         ShiroFilterFactoryBean shiroFilterFactoryBean  = new ShiroFilterFactoryBean();
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         // 必须设置 SecurityManager
         shiroFilterFactoryBean.setSecurityManager(securityManager);
-        filterRegistrationBean.setFilter(new ShiroSessionFilter());
         //增加自定义过滤器
         Map<String, Filter> filters = new HashMap<>(5);
         filters.put("admin", new AdminFormAuthenticationFilter());
-        filters.put("logout", new CustomerLogoutFilter());
+        filters.put("logout", shiroLogoutFilter());
         shiroFilterFactoryBean.setFilters(filters);
-        filterRegistrationBean.setFilter(new ShiroSessionFilter());
         Map<String,String> filterChainDefinitionMap = new LinkedHashMap<String,String>();
 
         //配置退出过滤器,其中的具体的退出代码Shiro已经替我们实现了
@@ -122,4 +191,36 @@ public class ShiroConfiguration {
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }
+
+
+
+    /**
+     * 配置点击退出后返回的url
+     * 配置LogoutFilter
+     * @return
+     */
+    public CustomerLogoutFilter shiroLogoutFilter(){
+        CustomerLogoutFilter shiroLogoutFilter = new CustomerLogoutFilter();
+        //配置登出后重定向的地址，等出后配置跳转到登录接口
+        shiroLogoutFilter.setRedirectUrl("/login/logout");
+        return shiroLogoutFilter;
+    }
+
+    /**
+     * @RequiresPermissions
+     *  开启shiro aop注解支持.
+     *  使用代理方式;所以需要开启代码支持;
+     * @param securityManager
+     * @return
+     */
+    @Bean(name="authorizationAttributeSourceAdvisor")
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(DefaultWebSecurityManager securityManager){
+        if(logger.isDebugEnabled()){
+            logger.debug("ShiroConfiguration.authorizationAttributeSourceAdvisor()");
+        }
+        AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
+        authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
+        return authorizationAttributeSourceAdvisor;
+    }
+
 }

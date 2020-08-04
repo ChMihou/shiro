@@ -3,13 +3,15 @@ package com.example.restful.demo.service.impl;
 import com.example.restful.demo.dao.PermissionDao;
 import com.example.restful.demo.enity.Permission;
 import com.example.restful.demo.service.PermissionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
+@Service
 public class PermissionServiceImpl implements PermissionService {
 
-    @Resource
+    @Autowired
     PermissionDao permissionDao;
 
     @Override
@@ -35,5 +37,10 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public List<Permission> selectAll() {
         return permissionDao.selectAll();
+    }
+
+    @Override
+    public List<String> selectUserAll(String username) {
+        return permissionDao.selectUserAll(username);
     }
 }

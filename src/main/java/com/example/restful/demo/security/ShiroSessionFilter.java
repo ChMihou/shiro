@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 /**
  * 通过拦截器设置shiroSession过期时间
+ * Web应用操作应用后可以进行使用shiro默认touch方法自动刷新过期时间
  * @author yangwk
  */
 public class ShiroSessionFilter implements Filter {

@@ -16,7 +16,7 @@ import javax.servlet.ServletResponse;
 import java.util.Locale;
 
 /**
- *  自定义退出
+ * 自定义退出logout标签
  * @author geekcattle
  */
 public class CustomerLogoutFilter extends LogoutFilter {
