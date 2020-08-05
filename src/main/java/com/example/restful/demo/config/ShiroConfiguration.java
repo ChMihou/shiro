@@ -1,7 +1,5 @@
 package com.example.restful.demo.config;
 
-import com.example.restful.demo.common.redis.RedisSessionDAO;
-import com.example.restful.demo.common.redis.RedisShiroCacheManager;
 import com.example.restful.demo.common.shiro.ShiroRealm;
 import com.example.restful.demo.common.shiro.security.AdminFormAuthenticationFilter;
 import com.example.restful.demo.common.shiro.security.CustomSessionListener;
@@ -10,16 +8,11 @@ import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
 import org.apache.shiro.authc.pam.AuthenticationStrategy;
 import org.apache.shiro.realm.Realm;
-import org.apache.shiro.session.SessionListener;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.mgt.DefaultWebSubjectFactory;
-import org.apache.shiro.web.servlet.Cookie;
-import org.apache.shiro.web.servlet.ShiroHttpSession;
-import org.apache.shiro.web.servlet.SimpleCookie;
-import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -98,8 +91,8 @@ public class ShiroConfiguration {
         shiroAuthorizerRealms.add(adminShiroRealm());
         securityManager.setRealms(shiroAuthorizerRealms);
         securityManager.setSubjectFactory(new DefaultWebSubjectFactory());
-        securityManager.setCacheManager(redisCacheManager());
-        securityManager.setSessionManager(defaultWebSessionManager());
+        //securityManager.setCacheManager(redisCacheManager());
+        //securityManager.setSessionManager(defaultWebSessionManager());
         return securityManager;
     }
 
@@ -252,60 +245,60 @@ public class ShiroConfiguration {
         return authorizationAttributeSourceAdvisor;
     }
 
-    /**
-     * @see DefaultWebSessionManager
-     * @return
-     */
-    @Bean(name="sessionManager")
-    public DefaultWebSessionManager defaultWebSessionManager() {
-        if(logger.isDebugEnabled()){
-            logger.debug("ShiroConfiguration.defaultWebSessionManager()");
-        }
-        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-        //用户信息必须是序列化格式，要不创建用户信息创建不过去，此坑很大，
-        sessionManager.setSessionDAO(redisSessionDAO());
-        Collection<SessionListener> sessionListeners = new ArrayList<>();
-        sessionListeners.add(customSessionListener());
-        sessionManager.setSessionListeners(sessionListeners);
-        //单位为毫秒（1秒=1000毫秒） 3600000毫秒为1个小时
-        sessionManager.setSessionValidationInterval(3600000*12);
-        //3600000 milliseconds = 1 hour
-        sessionManager.setGlobalSessionTimeout(3600000*12);
-        //是否删除无效的，默认也是开启
-        sessionManager.setDeleteInvalidSessions(true);
-        //是否开启 检测，默认开启
-        sessionManager.setSessionValidationSchedulerEnabled(true);
-        //创建会话Cookie
-        Cookie cookie = new SimpleCookie(ShiroHttpSession.DEFAULT_SESSION_ID_NAME);
-        cookie.setName("WEBID");
-        cookie.setHttpOnly(true);
-        sessionManager.setSessionIdCookie(cookie);
-        return sessionManager;
-    }
-
-    /**
-     * 配置redisSessionDao进行默认redis存储
-     * @return
-     */
-    @Bean(name = "redisSessionDAO")
-    public RedisSessionDAO redisSessionDAO(){
-        if(logger.isDebugEnabled()){
-            logger.debug("ShiroConfiguration.redisSessionDAO()");
-        }
-        return new RedisSessionDAO();
-    }
-
-    /**
-     * 配置redis缓存Manager
-     * @return
-     */
-    @Bean(name = "redisCacheManager")
-    public RedisShiroCacheManager redisCacheManager() {
-        if(logger.isDebugEnabled()){
-            logger.debug("ShiroConfiguration.redisCacheManager()");
-        }
-        return new RedisShiroCacheManager();
-    }
+//    /**
+//     * @see DefaultWebSessionManager
+//     * @return
+//     */
+//    @Bean(name="sessionManager")
+//    public DefaultWebSessionManager defaultWebSessionManager() {
+//        if(logger.isDebugEnabled()){
+//            logger.debug("ShiroConfiguration.defaultWebSessionManager()");
+//        }
+//        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+//        //用户信息必须是序列化格式，要不创建用户信息创建不过去，此坑很大，
+//        sessionManager.setSessionDAO(redisSessionDAO());
+//        Collection<SessionListener> sessionListeners = new ArrayList<>();
+//        sessionListeners.add(customSessionListener());
+//        sessionManager.setSessionListeners(sessionListeners);
+//        //单位为毫秒（1秒=1000毫秒） 3600000毫秒为1个小时
+//        sessionManager.setSessionValidationInterval(3600000*12);
+//        //3600000 milliseconds = 1 hour
+//        sessionManager.setGlobalSessionTimeout(3600000*12);
+//        //是否删除无效的，默认也是开启
+//        sessionManager.setDeleteInvalidSessions(true);
+//        //是否开启 检测，默认开启
+//        sessionManager.setSessionValidationSchedulerEnabled(true);
+//        //创建会话Cookie
+//        Cookie cookie = new SimpleCookie(ShiroHttpSession.DEFAULT_SESSION_ID_NAME);
+//        cookie.setName("WEBID");
+//        cookie.setHttpOnly(true);
+//        sessionManager.setSessionIdCookie(cookie);
+//        return sessionManager;
+//    }
+//
+//    /**
+//     * 配置redisSessionDao进行默认redis存储
+//     * @return
+//     */
+//    @Bean(name = "redisSessionDAO")
+//    public RedisSessionDAO redisSessionDAO(){
+//        if(logger.isDebugEnabled()){
+//            logger.debug("ShiroConfiguration.redisSessionDAO()");
+//        }
+//        return new RedisSessionDAO();
+//    }
+//
+//    /**
+//     * 配置redis缓存Manager
+//     * @return
+//     */
+//    @Bean(name = "redisCacheManager")
+//    public RedisShiroCacheManager redisCacheManager() {
+//        if(logger.isDebugEnabled()){
+//            logger.debug("ShiroConfiguration.redisCacheManager()");
+//        }
+//        return new RedisShiroCacheManager();
+//    }
 
     /**
      * 配置Session监听器
