@@ -1,6 +1,6 @@
 package com.example.restful.demo.contrller.login;
 
-import com.example.restful.demo.security.CustomerAuthenticationToken;
+import com.example.restful.demo.common.shiro.security.CustomerAuthenticationToken;
 import com.example.restful.demo.enity.User;
 import com.example.restful.demo.service.UserService;
 import com.example.restful.demo.utils.ShiroUtils;

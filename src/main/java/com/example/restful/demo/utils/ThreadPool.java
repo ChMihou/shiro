@@ -1,11 +1,13 @@
 package com.example.restful.demo.utils;
 
-import lombok.SneakyThrows;
 import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
-import sun.misc.GC;
 
 import java.util.concurrent.*;
 
+
+/**
+ * 妥善使用线程池
+ */
 public class ThreadPool {
     public static void main(String[] args) {
 //    其中各个参数说明：

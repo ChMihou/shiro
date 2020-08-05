@@ -1,4 +1,4 @@
-package com.example.restful.demo.security;
+package com.example.restful.demo.common.shiro.security;
 
 import org.apache.shiro.authc.UsernamePasswordToken;
 
