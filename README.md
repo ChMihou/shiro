@@ -1,0 +1,4 @@
+# shiro
+springboot，shiro，mybatis，redis
+简单易懂，注释齐全的springboot整合shiro手脚架，可能里面还有一些无关的平时测试方法，但注释齐全，想接触shiro的可以简单看一下。
+手脚架内容分离准确，如果想换存储的框架或者不想使用redis进行缓存shiro信息，将其shiroConfigration中redis的配置注释可直接使用。
