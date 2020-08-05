@@ -1,6 +1,6 @@
 package com.example.restful.demo.security;
 
-import com.example.restful.demo.common.ShiroRealm;
+import com.example.restful.demo.common.shiro.ShiroRealm;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.RealmSecurityManager;
 import org.apache.shiro.session.SessionException;

@@ -1,4 +1,4 @@
-package com.example.restful.demo.common;
+package com.example.restful.demo.common.shiro;
 
 import com.example.restful.demo.enity.User;
 import com.example.restful.demo.service.PermissionService;
