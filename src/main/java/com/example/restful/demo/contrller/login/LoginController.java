@@ -39,11 +39,14 @@ public class LoginController {
     }
 
     @RequestMapping(value="login")
-    public String loginForm(){
+    public ModelAndView loginForm(){
+        ModelAndView mv = new ModelAndView();
         if(ShiroUtils.isLogin()){
-            return "redirect:login/index";
+            mv.setViewName("redirect:login/index");
+            return mv;
         }
-        return "login/loginauth";
+        mv.setViewName("login/loginauth");
+        return mv;
     }
 
     @RequestMapping("login/error")
@@ -63,7 +66,9 @@ public class LoginController {
         CustomerAuthenticationToken customerAuthenticationToken = new CustomerAuthenticationToken(name, pass, false);
         Subject subject = SecurityUtils.getSubject();
         try {
+
             subject.login(customerAuthenticationToken);
+
         } catch (
                 UnknownAccountException uae) {
             logger.info("对用户[" + username + "]进行登录验证..验证未通过,未知账户");
@@ -96,6 +101,7 @@ public class LoginController {
         }
         return mv;
     }
+
     @RequestMapping("login/loginauth")
     public ModelAndView loginshiro(){
         ModelAndView mv = new ModelAndView();
@@ -125,6 +131,7 @@ public class LoginController {
         System.out.println(session.getTimeout());
         return mv;
     }
+
     @RequestMapping("login/logout")
     public ModelAndView logout(){
         ModelAndView mv = new ModelAndView();
